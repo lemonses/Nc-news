@@ -63,7 +63,6 @@ describe('GET /api',()=>{
         .expect(200)
         .then(({body})=>{
             const {response} = body
-            console.log(response)
             expect(JSON.parse(response)).toMatchObject(endpoints)
         })
     })
