@@ -60,4 +60,20 @@ describe('GET /api/articles/:article_id',()=>{
             })
         })
     })
+    test('should return a 404 with the message article doesn\'t exist if given an id that does not exist in the database',()=>{
+        return request(app)
+        .get('/api/articles/999')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
+        })
+    })
+    test('should return a 404 message Invalid id if given an invalid id',()=>{
+        return request(app)
+        .get('/api/articles/notAnId')
+        .expect(404)
+        .then(({body})=> {
+            expect(body.message).toBe("Invalid id")
+        })
+    })
 })
