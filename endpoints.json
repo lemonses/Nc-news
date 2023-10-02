@@ -25,5 +25,17 @@
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an article object at the matching id",
+    "queries": [],
+    "exampleResponse": {
+      "article": { "title":"something shocking has happened",
+      "topic": "mitch",
+      "author":"rogersop",
+      "body":"Text from the article..",
+      "created_at":"2019-06-30T15:55:13.341Z",
+      "article_img_url":"hyperlink" }
+    }
   }
 }
