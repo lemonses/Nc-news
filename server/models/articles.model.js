@@ -11,3 +11,27 @@ exports.fetchArticle = (article_id) => {
         return result.rows[0]
     })
 }
+
+exports.fetchArticles = () => {
+    return db.query(`
+        SELECT articles.article_id,
+        articles.author,
+        articles.title,
+        articles.article_id,
+        articles.topic,
+        articles.created_at,
+        articles.votes,
+        articles.article_img_url,
+        comment_values.comment_count
+        FROM articles
+        LEFT JOIN (SELECT article_id,
+        COUNT(article_id) AS comment_count
+        FROM comments
+        GROUP BY comments.article_id)
+        AS comment_values 
+        ON comment_values.article_id = articles.article_id
+        ORDER BY created_at DESC;
+    `).then(({rows})=>{
+         return rows
+    })
+}
