@@ -15,6 +15,7 @@ describe('/api',()=>{
             expect(body.message).toBe('Path not found')
         })
     })
+
 })
 
 describe('GET /api/topics',()=>{
@@ -28,7 +29,6 @@ describe('GET /api/topics',()=>{
         .get('/api/topics')
         .expect(200)
         .then(({body})=>{
-            console.log(body)
             body.topics.forEach(topic => {
                 expect(topic).toHaveProperty('slug')
                 expect(topic).toHaveProperty('description')
@@ -36,3 +36,4 @@ describe('GET /api/topics',()=>{
         })
     })
 })
+
