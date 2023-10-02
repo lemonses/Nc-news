@@ -3,6 +3,7 @@ const app = require('../server/app')
 const request = require('supertest')
 const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data')
+const endpoints = require('../endpoints.json')
 
 beforeAll(()=>seed(data))
 afterAll(()=>db.end())
@@ -20,12 +21,7 @@ describe('/api',()=>{
 })
 
 describe('GET /api/topics',()=>{
-    test('should return a 200 status code',()=>{
-        return request(app)
-        .get('/api/topics')
-        .expect(200)
-    })
-    test('should return an array of topic objects',()=>{
+    test('should return an array of topic objects with 200 status code',()=>{
         return request(app)
         .get('/api/topics')
         .expect(200)
@@ -77,3 +73,24 @@ describe('GET /api/articles/:article_id',()=>{
         })
     })
 })
+describe('GET /api',()=>{
+    test('should return a JSON object with 200 status',()=>{
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body})=>{
+            const parsedResponse = JSON.parse(body.response)
+            expect(typeof parsedResponse).toBe('object')
+        })
+    })
+    test('should return all available endpoints',()=>{
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body})=>{
+            const {response} = body
+            expect(JSON.parse(response)).toMatchObject(endpoints)
+        })
+    })
+})
+

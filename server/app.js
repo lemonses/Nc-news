@@ -2,9 +2,11 @@ const express = require('express')
 const {getTopics} = require('./controllers/topics.controller.js')
 const {getArticle} = require('./controllers/articles.controller.js')
 const {handleCustomErrors, handlePSQLErrors} = require('./controllers/errors.controller.js')
+const {getTopics,getApi} = require('./controllers/topics.controller.js')
 
 const app = express()
 
+app.get('/api',getApi)
 app.get('/api/topics',getTopics)
 
 app.get('/api/articles/:article_id',getArticle)
