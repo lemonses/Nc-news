@@ -1,3 +1,2 @@
-# Northcoders News API
-
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+You will need to set up a .env.development to get this repo to work locally this should contain PGDATABASE=nc_news
+to access the test environment you will need .env.test this should contain PGDATABASE = nc_news_test
