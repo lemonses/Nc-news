@@ -68,10 +68,10 @@ describe('GET /api/articles/:article_id',()=>{
             expect(body.message).toBe("Article doesn't exist")
         })
     })
-    test('should return a 404 message Invalid id if given an invalid id',()=>{
+    test('should return a 400 message Invalid id if given an invalid id',()=>{
         return request(app)
         .get('/api/articles/notAnId')
-        .expect(404)
+        .expect(400)
         .then(({body})=> {
             expect(body.message).toBe("Invalid id")
         })
