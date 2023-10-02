@@ -21,12 +21,7 @@ describe('/api',()=>{
 })
 
 describe('GET /api/topics',()=>{
-    test('should return a 200 status code',()=>{
-        return request(app)
-        .get('/api/topics')
-        .expect(200)
-    })
-    test('should return an array of topic objects',()=>{
+    test('should return an array of topic objects with 200 status code',()=>{
         return request(app)
         .get('/api/topics')
         .expect(200)
@@ -41,20 +36,13 @@ describe('GET /api/topics',()=>{
 })
 
 describe('GET /api',()=>{
-    test('should return a 200 status code',()=>{
-        return request(app)
-        .get('/api')
-        .expect(200)
-    })
-    test('should return a JSON object',()=>{
+    test('should return a JSON object with 200 status',()=>{
         return request(app)
         .get('/api')
         .expect(200)
         .then(({body})=>{
-            const {response} = body
-            expect(typeof response).toBe('string')
-            expect(response[0]).toBe('{')
-            expect(response[response.length-1]).toBe('}')
+            const parsedResponse = JSON.parse(body.response)
+            expect(typeof parsedResponse).toBe('object')
         })
     })
     test('should return all available endpoints',()=>{
