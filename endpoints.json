@@ -43,7 +43,7 @@
     "queries": [],
     "exampleResponse": {
       "article": [{
-        "comment_id":"",
+        "comment_id":"36",
         "body":"Text from the comment..",
         "article_id":6,
         "author":"rogersop",
