@@ -39,7 +39,7 @@
     }
   },
   "POST /api/articles/:article_id/comments":{
-    "description": "serves an article object at the matching id",
+    "description": "adds a newe comment to the article at the provided id and serves the created object back",
     "queries": [],
     "exampleRequest": {"username":"username","body":"Comment text"},
     "exampleResponse": {
