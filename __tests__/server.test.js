@@ -157,4 +157,20 @@ describe('POST /api/articles/:article_id/comments',()=>{
             expect(body.message).toBe("Article doesn't exist")
         })
     })
+    test('should return a 400 Invalid id if given an invalid ID',()=>{
+        return request(app)
+        .post('/api/articles/notAnID/comments')
+        .send({username:'rogersop',body:'life changing'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Invalid id")
+        })
+    })
+    test('should return a 400 bad request if the body field is missing',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'rogersop'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
 })
