@@ -73,6 +73,7 @@ describe('GET /api/articles/:article_id',()=>{
         })
     })
 })
+
 describe('GET /api',()=>{
     test('should return a JSON object with 200 status',()=>{
         return request(app)
@@ -120,6 +121,40 @@ describe('GET /api/articles',()=>{
         .expect(200)
         .then(({body})=>{
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+})
+
+describe('POST /api/articles/:article_id/comments',()=>{
+    test('should return a 201 status code with the posted comment',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'rogersop',body:'life changing'})
+        .expect(201)
+        .then(({body}) => {
+            const comment = body.comment
+            expect(typeof comment.comment_id).toBe('number')
+            expect(typeof comment.votes).toBe('number')
+            expect(typeof comment.created_at).toBe('string')
+            expect(typeof comment.author).toBe('string')
+            expect(typeof comment.body).toBe('string')
+            expect(typeof comment.article_id).toBe('number')
+        })
+    })
+    test('should return a 400 bad request if passed a username that does not exist in the users database',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'notAUser',body:'life changing'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if passed a valid id that does not appear in the database',()=>{
+        return request(app)
+        .post('/api/articles/999/comments')
+        .send({username:'rogersop',body:'life changing'})
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
         })
     })
 })
