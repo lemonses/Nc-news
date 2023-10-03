@@ -45,3 +45,15 @@ exports.fetchComments = (article_id) => {
         return result.rows
     })
 }
+
+exports.updateArticle = (article_id,body) => {
+    const addVotes = body.inc_votes
+    return db.query(`
+        UPDATE articles
+        SET votes = votes + $1
+        WHERE article_id = $2
+        RETURNING *;
+    `,[addVotes,article_id]).then((result)=>{
+        return result.rows[0]
+    })
+}
