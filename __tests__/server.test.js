@@ -94,3 +94,32 @@ describe('GET /api',()=>{
     })
 })
 
+describe('GET /api/articles',()=>{
+    test('should return a status code 200 with an array of articles',()=>{
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(13)
+            body.articles.forEach((article)=>{
+                expect(article).toHaveProperty('author')
+                expect(article).toHaveProperty('title')
+                expect(article).toHaveProperty('article_id')
+                expect(article).toHaveProperty('topic')
+                expect(article).toHaveProperty('created_at')
+                expect(article).toHaveProperty('votes')
+                expect(article).toHaveProperty('article_img_url')
+                expect(article).toHaveProperty('comment_count')
+                expect(article).not.toHaveProperty('body')
+            })
+        })
+    })
+    test('should return articles in descending date order',()=>{
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+})
