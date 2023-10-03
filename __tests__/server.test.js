@@ -165,4 +165,12 @@ describe('GET /api/articles/:article_id/comments',()=>{
             expect(body.comments).toHaveLength(0)
         })
     })
+    test('should return most recent comments first',()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body})=> {
+            expect(body.comments).toBeSortedBy('created_at',{descending:true})
+        })
+    })
 })
