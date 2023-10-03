@@ -56,7 +56,7 @@ describe('GET /api/articles/:article_id',()=>{
             })
         })
     })
-    test('should return a 404 with the message article doesn\'t exist if given an id that does not exist in the database',()=>{
+    test('should return a 404 with the message Article doesn\'t exist if given an id that does not exist in the database',()=>{
         return request(app)
         .get('/api/articles/999')
         .expect(404)
@@ -120,6 +120,57 @@ describe('GET /api/articles',()=>{
         .expect(200)
         .then(({body})=>{
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+})
+
+describe('GET /api/articles/:article_id/comments',()=>{
+    test('should return a 200 status code with an array of comments',()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach(comment => {
+                expect(typeof comment.comment_id).toBe('number')
+                expect(typeof comment.votes).toBe('number')
+                expect(typeof comment.created_at).toBe('string')
+                expect(typeof comment.author).toBe('string')
+                expect(typeof comment.body).toBe('string')
+                expect(typeof comment.article_id).toBe('number')
+            })
+        })
+    })
+    test('should return a 404 with the message Article doesn\'t exist if given an id that does not exist in the database',()=>{
+        return request(app)
+        .get('/api/articles/999/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("Article doesn't exist")
+        })
+    })
+    test('should return a 400 message Invalid id if given an invalid id',()=>{
+        return request(app)
+        .get('/api/articles/notAnId/comments')
+        .expect(400)
+        .then(({body})=> {
+            expect(body.message).toBe("Invalid id")
+        })
+    })
+    test('should return a 200 and an empty array if the article exists but does not have any comments',()=>{
+        return request(app)
+        .get('/api/articles/12/comments')
+        .expect(200)
+        .then(({body})=> {
+            expect(body.comments).toHaveLength(0)
+        })
+    })
+    test('should return most recent comments first',()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body})=> {
+            expect(body.comments).toBeSortedBy('created_at',{descending:true})
         })
     })
 })
