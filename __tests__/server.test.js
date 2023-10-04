@@ -124,6 +124,32 @@ describe('GET /api/articles',()=>{
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
         })
     })
+    test('should accept a query of topic that will filter the results to only the chosen topic',()=>{
+        return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({body})=>{
+            body.articles.forEach((article)=>{
+                expect(article.topic).toBe('mitch')
+            })
+        })
+    })
+    test('should return a 200 with an empty array if given a valid topic with no articles',()=>{
+        return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(0)
+        })
+    })
+    test('should return a 404 Topic not found if the topic does not exist',()=>{
+        return request(app)
+        .get('/api/articles?topic=notATopic')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.message).toBe('Topic not found')
+        })
+    })
 })
 
 describe('POST /api/articles/:article_id/comments',()=>{
