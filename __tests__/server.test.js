@@ -4,6 +4,7 @@ const request = require('supertest')
 const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data')
 const endpoints = require('../endpoints.json')
+const {convertTimestampToDate} = require('../db/seeds/utils.js')
 
 beforeAll(()=>seed(data))
 afterAll(()=>db.end())
@@ -125,6 +126,37 @@ describe('GET /api/articles',()=>{
     })
 })
 
+describe('POST /api/articles/:article_id/comments',()=>{
+    test('should return a 201 status code with the posted comment',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'rogersop',body:'life changing'})
+        .expect(201)
+        .then(({body}) => {
+            const comment = body.comment
+            expect(typeof comment.comment_id).toBe('number')
+            expect(typeof comment.votes).toBe('number')
+            expect(typeof comment.created_at).toBe('string')
+            expect(typeof comment.author).toBe('string')
+            expect(typeof comment.body).toBe('string')
+            expect(typeof comment.article_id).toBe('number')
+        })
+    })
+    test('should return a 404  User not found if passed a username that does not exist in the users database',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'notAUser',body:'life changing'})
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('User not found')
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if passed a valid id that does not appear in the database',()=>{
+        return request(app)
+        .post('/api/articles/999/comments')
+        .send({username:'rogersop',body:'life changing'})
+    })
+})
+   
 describe('GET /api/articles/:article_id/comments',()=>{
     test('should return a 200 status code with an array of comments',()=>{
         return request(app)
@@ -160,7 +192,7 @@ describe('GET /api/articles/:article_id/comments',()=>{
     })
     test('should return a 200 and an empty array if the article exists but does not have any comments',()=>{
         return request(app)
-        .get('/api/articles/12/comments')
+        .get('/api/articles/10/comments')
         .expect(200)
         .then(({body})=> {
             expect(body.comments).toHaveLength(0)
@@ -172,6 +204,39 @@ describe('GET /api/articles/:article_id/comments',()=>{
         .expect(200)
         .then(({body})=>{
             expect(body.comments).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .post('/api/articles/notAnID/comments')
+        .send({username:'rogersop',body:'life changing'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return a 400 bad request if the body field is missing',()=>{
+        return request(app)
+        .post('/api/articles/12/comments')
+        .send({username:'rogersop'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should ignore any additional properties on the body object',()=>{
+        return request(app)
+        .post('/api/articles/11/comments')
+        .send({username:'rogersop',body:'life changing',notImportant:'hello',test:100,votes:1})
+        .expect(201)
+        .then(({body}) => {
+            const comment = body.comment
+            expect(comment).toMatchObject({
+                comment_id : 21,
+                votes : 0,
+                created_at: convertTimestampToDate(Date.now()),
+                author : 'rogersop',
+                body : 'life changing',
+                article_id: 11
+            })
         })
     })
 })

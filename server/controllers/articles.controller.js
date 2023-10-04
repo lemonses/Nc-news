@@ -1,4 +1,5 @@
-const {fetchArticle,fetchArticles,fetchComments,updateArticle,removeComment, getComment} = require('../models/articles.model.js')
+const {fetchArticle,fetchArticles,fetchComments,updateArticle,removeComment, getComment,insertComment} = require('../models/articles.model.js')
+const {fetchUser} = require('../models/users.models.js')
 
 exports.getArticle = (req,res,next) => {
     const {article_id} = req.params
@@ -13,6 +14,19 @@ exports.getArticle = (req,res,next) => {
 exports.getArticles = (req,res,next) => {
     fetchArticles().then((articles) => {
         res.status(200).send({articles})
+    })
+}
+
+exports.postComment = (req,res,next) => {
+    const {body} = req
+    const {article_id} = req.params
+    const promises = [fetchArticle(article_id),fetchUser(body.username)]
+    Promise.all(promises).then(()=>{
+        return insertComment(article_id,body)
+    }).then((comment) => {
+        res.status(201).send({comment})
+    }).catch((err)=>{
+        next(err)
     })
 }
 

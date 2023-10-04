@@ -1,5 +1,5 @@
 const express = require('express')
-const {getArticle,getArticles,getComments,patchArticle,deleteComment} = require('./controllers/articles.controller.js')
+const {getArticle,getArticles,getComments,patchArticle,deleteComment,postComment} = require('./controllers/articles.controller.js')
 const {handleCustomErrors, handlePSQLErrors,handle500} = require('./controllers/errors.controller.js')
 const {getTopics,getApi} = require('./controllers/topics.controller.js')
 
@@ -17,6 +17,8 @@ app.patch('/api/articles/:article_id',patchArticle)
 
 app.delete('/api/comments/:comment_id',deleteComment)
 
+app.post('/api/articles/:article_id/comments',postComment)
+
 app.use(handleCustomErrors)
 app.use(handlePSQLErrors)
 app.use(handle500)
@@ -24,6 +26,5 @@ app.use(handle500)
 app.all('/*',(req,res,next) => {
     res.status(404).send({message:'Path not found'})
 })
-app.use(handleCustomErrors)
 
 module.exports = app
