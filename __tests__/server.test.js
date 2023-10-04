@@ -193,22 +193,6 @@ describe('PATCH /api/articles/:article_id',()=>{
             })
         })
     })
-    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
-        return request(app)
-        .patch('/api/articles/999')
-        .send({ inc_votes : 10 })
-        .expect(404).then(({body})=>{
-            expect(body.message).toBe("Article doesn't exist")
-        })
-    })
-    test('should return a 400 Bad request if given an invalid ID',()=>{
-        return request(app)
-        .patch('/api/articles/notAnID')
-        .send({ inc_votes : 10 })
-        .expect(400).then(({body})=>{
-            expect(body.message).toBe("Bad request")
-        })
-    })
     test('should return a reduced vote count if passed a negative number',()=>{
         return request(app)
         .patch('/api/articles/2')
@@ -254,6 +238,29 @@ describe('PATCH /api/articles/:article_id',()=>{
         .send({ inc_votes : 'hello', not_important:'nothing', test: 100})
         .expect(400).then(({body})=>{
             expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .patch('/api/articles/notAnID')
+        .send({ inc_votes : 10 })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return 400 bad request if no body is provided',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
+        return request(app)
+        .patch('/api/articles/999')
+        .send({ inc_votes : 10 })
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
         })
     })
 })

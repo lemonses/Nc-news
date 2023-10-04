@@ -29,9 +29,7 @@ exports.getComments = (req,res,next) => {
 exports.patchArticle = (req,res,next) => {
     const {body} = req
     const {article_id} = req.params
-    fetchArticle(article_id).then(()=>{
-        return updateArticle(article_id,body)
-    }).then((article)=>{
+    updateArticle(article_id,body).then((article)=>{
         res.status(200).send({article})
     }).catch((err) => {
         next(err)
