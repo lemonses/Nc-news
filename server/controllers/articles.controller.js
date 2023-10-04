@@ -1,9 +1,9 @@
-const {fetchArticle,fetchArticles,insertComment} = require('../models/articles.model.js')
+const {fetchArticle,fetchArticles,fetchComments,updateArticle,removeComment, getComment,insertComment} = require('../models/articles.model.js')
 const {fetchUser} = require('../models/users.models.js')
 
 exports.getArticle = (req,res,next) => {
     const {article_id} = req.params
-    fetchArticle(article_id).then((article)=>{
+    fetchArticle(article_id).then((article) => {
         res.status(200).send({article})
     })
     .catch((err)=>{
@@ -12,7 +12,7 @@ exports.getArticle = (req,res,next) => {
 }
 
 exports.getArticles = (req,res,next) => {
-    fetchArticles().then((articles)=>{
+    fetchArticles().then((articles) => {
         res.status(200).send({articles})
     })
 }
@@ -26,7 +26,38 @@ exports.postComment = (req,res,next) => {
     }).then((comment) => {
         res.status(201).send({comment})
     }).catch((err)=>{
-        console.log(err)
+        next(err)
+    })
+}
+
+exports.getComments = (req,res,next) => {
+    const {article_id} = req.params
+    let promises = [fetchComments(article_id),fetchArticle(article_id)]
+    Promise.all(promises).then(([comments]) => {
+        res.status(200).send({comments})
+    }).catch((err)=>{
+        next(err)
+    })
+}
+
+exports.patchArticle = (req,res,next) => {
+    const {body} = req
+    const {article_id} = req.params
+    updateArticle(article_id,body).then((article)=>{
+        res.status(200).send({article})
+    }).catch((err) => {
+        next(err)
+    })
+}
+
+exports.deleteComment = (req,res,next) => {
+    const {comment_id} = req.params
+    getComment(comment_id).then(()=>{
+        return removeComment(comment_id)
+    })
+    .then(()=>{
+        res.status(204).send()
+    }).catch((err)=>{
         next(err)
     })
 }

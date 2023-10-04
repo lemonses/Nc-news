@@ -57,7 +57,7 @@ describe('GET /api/articles/:article_id',()=>{
             })
         })
     })
-    test('should return a 404 with the message article doesn\'t exist if given an id that does not exist in the database',()=>{
+    test('should return a 404 with the message Article doesn\'t exist if given an id that does not exist in the database',()=>{
         return request(app)
         .get('/api/articles/999')
         .expect(404)
@@ -65,12 +65,12 @@ describe('GET /api/articles/:article_id',()=>{
             expect(body.message).toBe("Article doesn't exist")
         })
     })
-    test('should return a 400 message Invalid id if given an invalid id',()=>{
+    test('should return a 400 message Bad request if given an invalid id',()=>{
         return request(app)
         .get('/api/articles/notAnId')
         .expect(400)
         .then(({body})=> {
-            expect(body.message).toBe("Invalid id")
+            expect(body.message).toBe("Bad request")
         })
     })
 })
@@ -154,16 +154,64 @@ describe('POST /api/articles/:article_id/comments',()=>{
         return request(app)
         .post('/api/articles/999/comments')
         .send({username:'rogersop',body:'life changing'})
-        .expect(404).then(({body})=>{
+    })
+})
+   
+describe('GET /api/articles/:article_id/comments',()=>{
+    test('should return a 200 status code with an array of comments',()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments).toHaveLength(11)
+            body.comments.forEach(comment => {
+                expect(typeof comment.comment_id).toBe('number')
+                expect(typeof comment.votes).toBe('number')
+                expect(typeof comment.created_at).toBe('string')
+                expect(typeof comment.author).toBe('string')
+                expect(typeof comment.body).toBe('string')
+                expect(typeof comment.article_id).toBe('number')
+            })
+        })
+    })
+    test('should return a 404 with the message Article doesn\'t exist if given an id that does not exist in the database',()=>{
+        return request(app)
+        .get('/api/articles/999/comments')
+        .expect(404)
+        .then(({body}) => {
             expect(body.message).toBe("Article doesn't exist")
         })
     })
-    test('should return a 400 Invalid id if given an invalid ID',()=>{
+    test('should return a 400 message Bad request if given an invalid id',()=>{
+        return request(app)
+        .get('/api/articles/notAnId/comments')
+        .expect(400)
+        .then(({body})=> {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return a 200 and an empty array if the article exists but does not have any comments',()=>{
+        return request(app)
+        .get('/api/articles/10/comments')
+        .expect(200)
+        .then(({body})=> {
+            expect(body.comments).toHaveLength(0)
+        })
+    })
+    test('should return most recent comments first',()=>{
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.comments).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
         return request(app)
         .post('/api/articles/notAnID/comments')
         .send({username:'rogersop',body:'life changing'})
         .expect(400).then(({body})=>{
-            expect(body.message).toBe("Invalid id")
+            expect(body.message).toBe("Bad request")
         })
     })
     test('should return a 400 bad request if the body field is missing',()=>{
@@ -189,6 +237,122 @@ describe('POST /api/articles/:article_id/comments',()=>{
                 body : 'life changing',
                 article_id: 11
             })
+        })
+    })
+})
+
+describe('PATCH /api/articles/:article_id',()=>{
+    test('should return 200 status with the updated article',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 10 })
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: 'Living in the shadow of a great man',
+                topic:'mitch',
+                created_at:'2020-07-09T20:11:00.000Z',
+                votes:110,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
+        return request(app)
+        .patch('/api/articles/999')
+        .send({ inc_votes : 10 })
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .patch('/api/articles/notAnID')
+        .send({ inc_votes : 10 })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return a reduced vote count if passed a negative number',()=>{
+        return request(app)
+        .patch('/api/articles/2')
+        .send({ inc_votes : -30 })
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 2,
+                title: 'Sony Vaio; or, The Laptop',
+                topic:'mitch',
+                created_at:'2020-10-16T05:03:00.000Z',
+                votes:-30,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should ignore additional properties on the body object',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 10, not_important:'nothing', test: 100})
+        .expect(200).then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: 'Living in the shadow of a great man',
+                topic:'mitch',
+                created_at:'2020-07-09T20:11:00.000Z',
+                votes:120,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should return a 400 bad request if body is missing inc_votes key',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_vote : 1, not_important:'nothing', test: 100})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 bad request if inc_votes is invalid data type',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 'hello', not_important:'nothing', test: 100})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+})
+
+describe('DELETE /api/comments/:comment_id',()=>{
+    test('should return a 204 with no content',()=>{
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+    })
+    test('should delete the comment at the id',()=>{
+        return request(app)
+        .delete('/api/comments/3')
+        .expect(204).then(({body})=>{
+            return db.query(`
+                SELECT * FROM comments
+                WHERE comment_id = 3;            
+            `)
+        }).then((result)=>{
+            expect(result.rows).toHaveLength(0)
+        })
+    })
+    test('should return a 400 Bad request if given an invalid id',()=>{
+        return request(app)
+        .delete('/api/comments/notAnId')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 404 Comment not found if given a valid id that doesn\'t exist in the database',()=>{
+        return request(app)
+        .delete('/api/comments/999')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('Comment doesn\'t exist')
         })
     })
 })
