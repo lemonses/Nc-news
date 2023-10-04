@@ -64,15 +64,16 @@ describe('GET /api/articles/:article_id',()=>{
             expect(body.message).toBe("Article doesn't exist")
         })
     })
-    test('should return a 400 message Invalid id if given an invalid id',()=>{
+    test('should return a 400 message Bad request if given an invalid id',()=>{
         return request(app)
         .get('/api/articles/notAnId')
         .expect(400)
         .then(({body})=> {
-            expect(body.message).toBe("Invalid id")
+            expect(body.message).toBe("Bad request")
         })
     })
 })
+
 describe('GET /api',()=>{
     test('should return a JSON object with 200 status',()=>{
         return request(app)
@@ -149,12 +150,12 @@ describe('GET /api/articles/:article_id/comments',()=>{
             expect(body.message).toBe("Article doesn't exist")
         })
     })
-    test('should return a 400 message Invalid id if given an invalid id',()=>{
+    test('should return a 400 message Bad request if given an invalid id',()=>{
         return request(app)
         .get('/api/articles/notAnId/comments')
         .expect(400)
         .then(({body})=> {
-            expect(body.message).toBe("Invalid id")
+            expect(body.message).toBe("Bad request")
         })
     })
     test('should return a 200 and an empty array if the article exists but does not have any comments',()=>{
@@ -169,8 +170,97 @@ describe('GET /api/articles/:article_id/comments',()=>{
         return request(app)
         .get('/api/articles/1/comments')
         .expect(200)
-        .then(({body})=> {
+        .then(({body})=>{
             expect(body.comments).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+})
+
+describe('PATCH /api/articles/:article_id',()=>{
+    test('should return 200 status with the updated article',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 10 })
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: 'Living in the shadow of a great man',
+                topic:'mitch',
+                created_at:'2020-07-09T20:11:00.000Z',
+                votes:110,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should return a reduced vote count if passed a negative number',()=>{
+        return request(app)
+        .patch('/api/articles/2')
+        .send({ inc_votes : -30 })
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 2,
+                title: 'Sony Vaio; or, The Laptop',
+                topic:'mitch',
+                created_at:'2020-10-16T05:03:00.000Z',
+                votes:-30,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should ignore additional properties on the body object',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 10, not_important:'nothing', test: 100})
+        .expect(200).then(({body})=>{
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: 'Living in the shadow of a great man',
+                topic:'mitch',
+                created_at:'2020-07-09T20:11:00.000Z',
+                votes:120,
+                article_img_url:'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+            })
+        })
+    })
+    test('should return a 400 bad request if body is missing inc_votes key',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_vote : 1, not_important:'nothing', test: 100})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 bad request if inc_votes is invalid data type',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .send({ inc_votes : 'hello', not_important:'nothing', test: 100})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .patch('/api/articles/notAnID')
+        .send({ inc_votes : 10 })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return 400 bad request if no body is provided',()=>{
+        return request(app)
+        .patch('/api/articles/1')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
+        return request(app)
+        .patch('/api/articles/999')
+        .send({ inc_votes : 10 })
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
         })
     })
 })
