@@ -4,6 +4,7 @@ const request = require('supertest')
 const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data')
 const endpoints = require('../endpoints.json')
+const {convertTimestampToDate} = require('../db/seeds/utils.js')
 
 beforeAll(()=>seed(data))
 afterAll(()=>db.end())
@@ -141,12 +142,12 @@ describe('POST /api/articles/:article_id/comments',()=>{
             expect(typeof comment.article_id).toBe('number')
         })
     })
-    test('should return a 400 bad request if passed a username that does not exist in the users database',()=>{
+    test('should return a 404  User not found if passed a username that does not exist in the users database',()=>{
         return request(app)
         .post('/api/articles/12/comments')
         .send({username:'notAUser',body:'life changing'})
-        .expect(400).then(({body})=>{
-            expect(body.message).toBe('Bad request')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('User not found')
         })
     })
     test('should return a 404 Article doesn\'t exist if passed a valid id that does not appear in the database',()=>{
@@ -171,6 +172,23 @@ describe('POST /api/articles/:article_id/comments',()=>{
         .send({username:'rogersop'})
         .expect(400).then(({body})=>{
             expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should ignore any additional properties on the body object',()=>{
+        return request(app)
+        .post('/api/articles/11/comments')
+        .send({username:'rogersop',body:'life changing',notImportant:'hello',test:100,votes:1})
+        .expect(201)
+        .then(({body}) => {
+            const comment = body.comment
+            expect(comment).toMatchObject({
+                comment_id : 21,
+                votes : 0,
+                created_at: convertTimestampToDate(Date.now()),
+                author : 'rogersop',
+                body : 'life changing',
+                article_id: 11
+            })
         })
     })
 })
