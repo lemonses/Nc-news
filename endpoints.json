@@ -52,6 +52,10 @@
       }]
     }
   },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the comment at the provided id",
+    "queries": []
+  },
   "PATCH /api/articles/:article_id":{
     "description": "increments the votes by the provided value and serves the updated article",
     "queries": [],

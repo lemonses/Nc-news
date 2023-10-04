@@ -1,5 +1,5 @@
 const express = require('express')
-const {getArticle,getArticles,getComments,patchArticle} = require('./controllers/articles.controller.js')
+const {getArticle,getArticles,getComments,patchArticle,deleteComment} = require('./controllers/articles.controller.js')
 const {handleCustomErrors, handlePSQLErrors,handle500} = require('./controllers/errors.controller.js')
 const {getTopics,getApi} = require('./controllers/topics.controller.js')
 
@@ -14,6 +14,8 @@ app.get('/api/articles/:article_id',getArticle)
 app.get('/api/articles/:article_id/comments',getComments)
 
 app.patch('/api/articles/:article_id',patchArticle)
+
+app.delete('/api/comments/:comment_id',deleteComment)
 
 app.use(handleCustomErrors)
 app.use(handlePSQLErrors)

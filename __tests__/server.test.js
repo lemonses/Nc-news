@@ -193,6 +193,22 @@ describe('PATCH /api/articles/:article_id',()=>{
             })
         })
     })
+    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
+        return request(app)
+        .patch('/api/articles/999')
+        .send({ inc_votes : 10 })
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .patch('/api/articles/notAnID')
+        .send({ inc_votes : 10 })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe("Bad request")
+        })
+    })
     test('should return a reduced vote count if passed a negative number',()=>{
         return request(app)
         .patch('/api/articles/2')
@@ -240,27 +256,38 @@ describe('PATCH /api/articles/:article_id',()=>{
             expect(body.message).toBe('Bad request')
         })
     })
-    test('should return a 400 Bad request if given an invalid ID',()=>{
+})
+
+describe('DELETE /api/comments/:comment_id',()=>{
+    test('should return a 204 with no content',()=>{
         return request(app)
-        .patch('/api/articles/notAnID')
-        .send({ inc_votes : 10 })
-        .expect(400).then(({body})=>{
-            expect(body.message).toBe("Bad request")
+        .delete('/api/comments/1')
+        .expect(204)
+    })
+    test('should delete the comment at the id',()=>{
+        return request(app)
+        .delete('/api/comments/3')
+        .expect(204).then(({body})=>{
+            return db.query(`
+                SELECT * FROM comments
+                WHERE comment_id = 3;            
+            `)
+        }).then((result)=>{
+            expect(result.rows).toHaveLength(0)
         })
     })
-    test('should return 400 bad request if no body is provided',()=>{
+    test('should return a 400 Bad request if given an invalid id',()=>{
         return request(app)
-        .patch('/api/articles/1')
+        .delete('/api/comments/notAnId')
         .expect(400).then(({body})=>{
             expect(body.message).toBe('Bad request')
         })
     })
-    test('should return a 404 Article doesn\'t exist if a valid but not existing id is provided',()=>{
+    test('should return 404 Comment not found if given a valid id that doesn\'t exist in the database',()=>{
         return request(app)
-        .patch('/api/articles/999')
-        .send({ inc_votes : 10 })
+        .delete('/api/comments/999')
         .expect(404).then(({body})=>{
-            expect(body.message).toBe("Article doesn't exist")
+            expect(body.message).toBe('Comment doesn\'t exist')
         })
     })
 })
