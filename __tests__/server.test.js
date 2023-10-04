@@ -257,3 +257,39 @@ describe('PATCH /api/articles/:article_id',()=>{
         })
     })
 })
+
+describe('DELETE /api/comments/:comment_id',()=>{
+    test('should return a 204 with no content',()=>{
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204).then(({body})=>{
+            expect(body).toEqual({})
+        })
+    })
+    test('should delete the comment at the id',()=>{
+        return request(app)
+        .delete('/api/comments/2')
+        .expect(204).then(({body})=>{
+            return db.query(`
+                SELECT * FROM comments
+                WHERE comment_id = 2;            
+            `)
+        }).then((result)=>{
+            expect(result.rows).toHaveLength(0)
+        })
+    })
+    test('should return a 400 Bad request if given an invalid id',()=>{
+        return request(app)
+        .delete('/api/comments/notAnId')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 404 Comment not found if given a valid id that doesn\'t exist in the database',()=>{
+        return request(app)
+        .delete('/api/comments/999')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('Comment doesn\'t exist')
+        })
+    })
+})
