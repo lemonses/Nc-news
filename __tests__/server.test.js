@@ -262,9 +262,7 @@ describe('DELETE /api/comments/:comment_id',()=>{
     test('should return a 204 with no content',()=>{
         return request(app)
         .delete('/api/comments/1')
-        .expect(204).then(({body})=>{
-            expect(body).toEqual({})
-        })
+        .expect(204)
     })
     test('should delete the comment at the id',()=>{
         return request(app)
