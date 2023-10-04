@@ -55,5 +55,18 @@
   "DELETE /api/comments/:comment_id": {
     "description": "deletes the comment at the provided id",
     "queries": []
+  },
+  "PATCH /api/articles/:article_id":{
+    "description": "increments the votes by the provided value and serves the updated article",
+    "queries": [],
+    "exampleRequest": {"inc_votes":"10"},
+    "exampleResponse": {
+      "article": { "article_id":"10",
+      "title":"something shocking has happened",
+      "topic":"mitch",
+      "article_img_url":"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      "votes":10,
+      "created_at":"2019-11-31T15:55:13.341Z"}
+    }
   }
 }
