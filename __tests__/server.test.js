@@ -268,11 +268,11 @@ describe('DELETE /api/comments/:comment_id',()=>{
     })
     test('should delete the comment at the id',()=>{
         return request(app)
-        .delete('/api/comments/2')
+        .delete('/api/comments/3')
         .expect(204).then(({body})=>{
             return db.query(`
                 SELECT * FROM comments
-                WHERE comment_id = 2;            
+                WHERE comment_id = 3;            
             `)
         }).then((result)=>{
             expect(result.rows).toHaveLength(0)
