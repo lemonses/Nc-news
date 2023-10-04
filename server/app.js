@@ -25,5 +25,3 @@ app.all('/*',(req,res,next) => {
 app.use(handleCustomErrors)
 
 module.exports = app
-
-//add something
