@@ -123,7 +123,7 @@ describe('GET /api/articles',()=>{
             })
         })
     })
-    test('should return articles in descending date order',()=>{
+    test('should return articles in descending date order by default',()=>{
         return request(app)
         .get('/api/articles')
         .expect(200)
@@ -155,6 +155,38 @@ describe('GET /api/articles',()=>{
         .expect(404)
         .then(({body})=>{
             expect(body.message).toBe('Topic not found')
+        })
+    })
+    test('should accept a sort_by query that sorts by any valid column',()=>{
+        return request(app)
+        .get('/api/articles?sort_by=title')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toBeSortedBy('title',{descending:true})
+        })
+    })
+    test('should return 400 Bad request if sort_by is given a column that does not exist',()=>{
+        return request(app)
+        .get('/api/articles?sort_by=notAColumn')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should accept a query of order to decide whether the colums are sorted in asc or desc order',()=>{
+        return request(app)
+        .get('/api/articles?order=asc')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toBeSortedBy('created_at',{ascending:true})
+        })
+    })
+    test('should return 400 bad request if order query is invalid',()=>{
+        return request(app)
+        .get('/api/articles?order=notAnOrder')
+        .expect(400)
+        .then(({body})=>{
+            expect(body.message).toBe('Bad request')
         })
     })
 })

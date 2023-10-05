@@ -13,8 +13,8 @@ exports.getArticle = (req,res,next) => {
 }
 
 exports.getArticles = (req,res,next) => {
-    const {topic} = req.query
-    Promise.all([fetchArticles(topic),fetchTopic(topic)])
+    const {topic,sort_by,order} = req.query
+    Promise.all([fetchArticles(topic,sort_by,order),fetchTopic(topic)])
     .then(([articles]) => {
         res.status(200).send({articles})
     }).catch((err)=>{

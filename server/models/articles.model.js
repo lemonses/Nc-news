@@ -20,7 +20,7 @@ exports.fetchArticle = (article_id) => {
     })
 }
 
-exports.fetchArticles = (topic = '%') => {
+exports.fetchArticles = (topic = '%',sort_by = 'created_at',order = 'DESC') => {
         const queryStr = format(`
         SELECT articles.article_id,
         articles.author,
@@ -39,8 +39,8 @@ exports.fetchArticles = (topic = '%') => {
         AS comment_values 
         ON comment_values.article_id = articles.article_id
         WHERE articles.topic LIKE %L 
-        ORDER BY created_at DESC;
-    `,topic)
+        ORDER BY %s %s;
+    `,topic,sort_by,order)
     return db.query(queryStr).then(({rows})=>{
         return rows
     })
