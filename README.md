@@ -20,3 +20,6 @@ npm run seed
 
 and Finally to run the tests you will need to use this command
 npm test
+
+The minimum version of node compatible with this project is v20.4.0
+The minimum version of postgres compatible with this project is v14.9
