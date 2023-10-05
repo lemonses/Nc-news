@@ -53,7 +53,7 @@ describe('GET /api/articles/:article_id',()=>{
                     author: "rogersop",
                     body: "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages",
                     created_at: '2020-05-06T01:14:00.000Z',
-                    article_img_url:"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                    article_img_url:"https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
             })
         })
     })
@@ -71,6 +71,14 @@ describe('GET /api/articles/:article_id',()=>{
         .expect(400)
         .then(({body})=> {
             expect(body.message).toBe("Bad request")
+        })
+    })
+    test('should return correct comment count',()=>{
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article.comment_count).toBe('11')
         })
     })
 })
@@ -95,7 +103,6 @@ describe('GET /api',()=>{
         })
     })
 })
-
 describe('GET /api/articles',()=>{
     test('should return a status code 200 with an array of articles',()=>{
         return request(app)
@@ -122,6 +129,32 @@ describe('GET /api/articles',()=>{
         .expect(200)
         .then(({body})=>{
             expect(body.articles).toBeSortedBy('created_at',{descending:true})
+        })
+    })
+    test('should accept a query of topic that will filter the results to only the chosen topic',()=>{
+        return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({body})=>{
+            body.articles.forEach((article)=>{
+                expect(article.topic).toBe('mitch')
+            })
+        })
+    })
+    test('should return a 200 with an empty array if given a valid topic with no articles',()=>{
+        return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.articles).toHaveLength(0)
+        })
+    })
+    test('should return a 404 Topic not found if the topic does not exist',()=>{
+        return request(app)
+        .get('/api/articles?topic=notATopic')
+        .expect(404)
+        .then(({body})=>{
+            expect(body.message).toBe('Topic not found')
         })
     })
 })
@@ -353,6 +386,21 @@ describe('DELETE /api/comments/:comment_id',()=>{
         .delete('/api/comments/999')
         .expect(404).then(({body})=>{
             expect(body.message).toBe('Comment doesn\'t exist')
+        })
+    })
+})
+
+describe('GET /api/users',()=>{
+    test('should return a 200 status and an array of all user objects',()=>{
+        return request(app)
+        .get('/api/users')
+        .expect(200).then(({body})=>{
+            expect(body.users).toHaveLength(4)
+            body.users.forEach((user)=>{
+                expect(typeof user.username).toBe('string')
+                expect(typeof user.name).toBe('string')
+                expect(typeof user.avatar_url).toBe('string')
+            })
         })
     })
 })
