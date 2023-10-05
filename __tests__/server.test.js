@@ -458,3 +458,74 @@ describe('GET /api/users/:username',()=>{
         })
     })
 })
+
+describe.only('PATCH /api/comments/:comment_id',()=>{
+    test('should return a 200 status code with the updated comment',()=>{
+        return request(app)
+        .patch('/api/comments/4')
+        .send({inc_votes:10})
+        .expect(200).then(({body})=>{
+            expect(body.comment).toMatchObject({
+                body: " I carry a log — yes. Is it funny to you? It is not to me.",
+                votes: -90,
+                author: "icellusedkars",
+                article_id: 1,
+                created_at: '2020-02-23T12:01:00.000Z',
+            })
+        })
+    })
+    test('should reduce vote count if passed a negative number',()=>{
+        return request(app)
+        .patch('/api/comments/4')
+        .send({inc_votes:-30})
+        .expect(200).then(({body})=>{
+            expect(body.comment.votes).toBe(-120)
+        })
+    })
+    test('should ignore additional properties on the body object',()=>{
+        return request(app)
+        .patch('/api/comments/4')
+        .send({inc_votes:10,extraProperty:'extraValue',test:100})
+        .expect(200).then(({body})=>{
+            expect(body.comment).toMatchObject({
+                body: " I carry a log — yes. Is it funny to you? It is not to me.",
+                votes: -110,
+                author: "icellusedkars",
+                article_id: 1,
+                created_at: '2020-02-23T12:01:00.000Z',
+            })
+        })
+    })
+    test('should return 404 comment does not exist when a valid but not existing id is provided',()=>{
+        return request(app)
+        .patch('/api/comments/999')
+        .send({inc_votes:10,extraProperty:'extraValue',test:100})
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('Comment doesn\'t exist')
+        })
+    })
+    test('should return a 400 Bad request if given an invalid ID',()=>{
+        return request(app)
+        .patch('/api/comments/notAnId')
+        .send({inc_votes:10})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 bad request if the body is missing inc_votes key',()=>{
+        return request(app)
+        .patch('/api/comments/4')
+        .send({inc:10})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if inc_votes key is invalid data type',()=>{
+        return request(app)
+        .patch('/api/comments/4')
+        .send({inc_votes:'hello'})
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+})

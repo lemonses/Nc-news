@@ -1,4 +1,4 @@
-const {fetchArticle,fetchArticles,fetchComments,updateArticle,removeComment, getComment,insertComment} = require('../models/articles.model.js')
+const {fetchArticle,fetchArticles,fetchComments,updateArticle,insertComment} = require('../models/articles.model.js')
 const {fetchUser} = require('../models/users.models.js')
 const {fetchTopic} = require('../models/topics.model.js')
 
@@ -51,18 +51,6 @@ exports.patchArticle = (req,res,next) => {
     updateArticle(article_id,body).then((article)=>{
         res.status(200).send({article})
     }).catch((err) => {
-        next(err)
-    })
-}
-
-exports.deleteComment = (req,res,next) => {
-    const {comment_id} = req.params
-    getComment(comment_id).then(()=>{
-        return removeComment(comment_id)
-    })
-    .then(()=>{
-        res.status(204).send()
-    }).catch((err)=>{
         next(err)
     })
 }

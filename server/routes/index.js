@@ -1,4 +1,5 @@
 const articlesRouter = require('./articles-router')
-const userRouter = require('./user-router')
+const usersRouter = require('./users-router')
+const commentsRouter = require('./comments-router')
 
-module.exports = {articlesRouter,userRouter}
+module.exports = {articlesRouter,usersRouter,commentsRouter}
