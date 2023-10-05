@@ -459,7 +459,7 @@ describe('GET /api/users/:username',()=>{
     })
 })
 
-describe.only('PATCH /api/comments/:comment_id',()=>{
+describe('PATCH /api/comments/:comment_id',()=>{
     test('should return a 200 status code with the updated comment',()=>{
         return request(app)
         .patch('/api/comments/4')
