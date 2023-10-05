@@ -103,6 +103,7 @@ describe('GET /api',()=>{
         })
     })
 })
+
 describe('GET /api/articles',()=>{
     test('should return a status code 200 with an array of articles',()=>{
         return request(app)
@@ -433,6 +434,27 @@ describe('GET /api/users',()=>{
                 expect(typeof user.name).toBe('string')
                 expect(typeof user.avatar_url).toBe('string')
             })
+        })
+    })
+})
+
+describe('GET /api/users/:username',()=>{
+    test('should return a 200 with the user object at the associated username',()=>{
+        return request(app)
+        .get('/api/users/butter_bridge')
+        .expect(200).then(({body})=>{
+            expect(body.user).toMatchObject({
+                username: 'butter_bridge',
+                name: 'jonny',
+                avatar_url:'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
+            })
+        })
+    })
+    test('should return a 404 User not found if given a user that does not exist',()=>{
+        return request(app)
+        .get('/api/users/notAUser')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('User not found')
         })
     })
 })
