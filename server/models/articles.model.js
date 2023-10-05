@@ -21,15 +21,6 @@ exports.fetchArticle = (article_id) => {
 }
 
 exports.fetchArticles = (topic = '%') => {
-    const topicQuery = format(`
-    SELECT * FROM topics
-    WHERE slug LIKE %L;
-    `,topic)
-    return db.query(topicQuery) //refactor this to be its own function?
-    .then((result)=>{
-        if(result.rows.length === 0) {
-            return Promise.reject({status:404,message:'Topic not found'})
-        }
         const queryStr = format(`
         SELECT articles.article_id,
         articles.author,
@@ -50,8 +41,7 @@ exports.fetchArticles = (topic = '%') => {
         WHERE articles.topic LIKE %L 
         ORDER BY created_at DESC;
     `,topic)
-    return db.query(queryStr)
-    }).then(({rows})=>{
+    return db.query(queryStr).then(({rows})=>{
         return rows
     })
 }

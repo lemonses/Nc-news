@@ -74,6 +74,14 @@ describe('GET /api/articles/:article_id',()=>{
             expect(body.message).toBe("Bad request")
         })
     })
+    test('should return correct comment count',()=>{
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body})=>{
+            expect(body.article.comment_count).toBe('11')
+        })
+    })
 })
 
 describe('GET /api',()=>{
@@ -96,7 +104,6 @@ describe('GET /api',()=>{
         })
     })
 })
-
 describe('GET /api/articles',()=>{
     test('should return a status code 200 with an array of articles',()=>{
         return request(app)
