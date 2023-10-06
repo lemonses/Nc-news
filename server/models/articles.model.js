@@ -77,13 +77,33 @@ exports.insertComment = (article_id,newComment) => {
     })
 }
 
-exports.fetchComments = (article_id) => {
-    return db.query(`
-        SELECT * FROM comments
-        WHERE article_id = $1
-        ORDER BY created_at DESC;
-    `,[article_id]).then((result)=>{
-        return result.rows
+exports.fetchComments = (article_id,limit,p) => {
+    let stringForFormat = `
+    SELECT * FROM comments
+    WHERE article_id = %s
+    ORDER BY created_at DESC
+`
+    let query = [article_id]
+    if(limit || p){
+        if(!limit){
+            limit = '10'
+        }
+        if(!p){
+            p = 1
+        }
+        query.push((p-1) * limit)
+        stringForFormat += ` OFFSET %s ROWS LIMIT %s;`
+        query.push(limit)
+    }
+
+    const queryStr = format.withArray(stringForFormat,query)
+    return db.query(queryStr).then((result)=>{
+        if(result.rows.length === 0 && p){
+            return Promise.reject({status:404,message:'Page not found'})
+        }
+        return Promise.all([db.query(`SELECT COUNT(*) FROM comments WHERE article_id = $1;`,[article_id]),result.rows])
+    }).then((result)=>{
+        return [result[0].rows[0].count,result[1]]
     })
 }
 
