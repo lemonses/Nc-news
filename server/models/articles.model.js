@@ -148,3 +148,16 @@ exports.insertArticle = ({author,title,body,topic,article_img_url = 'https://ima
         
     })
 }
+
+exports.removeArticle = (article_id) => {
+    let promises = []
+    promises.push(db.query(`
+    DELETE FROM comments 
+    WHERE article_id = $1
+    `,[article_id]))
+    promises.push(db.query(`
+    DELETE FROM articles
+    WHERE article_id = $1;
+    `,[article_id]))
+    return Promise.all(promises)
+}

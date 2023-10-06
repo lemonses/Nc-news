@@ -1,4 +1,4 @@
-const {fetchArticle,fetchArticles,fetchComments,updateArticle,insertComment,insertArticle} = require('../models/articles.model.js')
+const {fetchArticle,fetchArticles,fetchComments,updateArticle,insertComment,insertArticle,removeArticle} = require('../models/articles.model.js')
 const {fetchUser} = require('../models/users.models.js')
 const {fetchTopic} = require('../models/topics.model.js')
 
@@ -64,6 +64,17 @@ exports.postArticle = (req,res,next) => {
     insertArticle(req.body).then((article) =>{
         res.status(200).send({article})
     }).catch((err)=>{
+        next(err)
+    })
+}
+
+exports.deleteArticle = (req,res,next) => {
+    const {article_id} = req.params
+    Promise.all([removeArticle(article_id),fetchArticle(article_id)])
+    .then(()=>{
+        res.status(204).send()
+    }).catch((err)=>{
+        console.log(err)
         next(err)
     })
 }

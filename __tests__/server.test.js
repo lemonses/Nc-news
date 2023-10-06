@@ -875,3 +875,39 @@ describe('POST /api/topics',()=>{
         })
     })
 })
+
+describe('DELETE /api/articles/:article_id',()=>{
+    test('should return a 204 status with no content',()=>{
+        return request(app)
+        .delete('/api/articles/1')
+        .expect(204)
+    })
+    test('should remove all articles and comments with the matching article_id',()=>{
+        return db.query(`
+        SELECT * FROM articles
+        WHERE article_id = 1;
+        `).then((result)=>{
+            expect(result.rows).toHaveLength(0)
+            return db.query(`
+            SELECT * FROM comments
+            WHERE article_id = 1;
+            `)
+        }).then((result)=>{
+            expect(result.rows).toHaveLength(0)
+        })
+    })
+    test('should return 400 Bad request if given an invalid id',()=>{
+        return request(app)
+        .delete('/api/articles/notAnId')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 404 Article doesn\'t exist if the request has a valid id that does not exist in the database',()=>{
+        return request(app)
+        .delete('/api/articles/999')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe("Article doesn't exist")
+        })
+    })
+})
