@@ -529,3 +529,145 @@ describe('PATCH /api/comments/:comment_id',()=>{
         })
     })
 })
+
+describe('POST /api/articles',()=>{
+    test('should return a 200 status code with the posted article with default img_url if no url is given',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            title:'Post Test',
+            body:'I am implementing a post test',
+            topic:'cats'
+        })
+        .expect(200).then(({body})=>{
+            expect(body.article).toMatchObject({
+                author:'rogersop',
+                title:'Post Test',
+                body:'I am implementing a post test',
+                topic:'cats',
+                article_id:14,
+                article_img_url:'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700',
+                votes:0,
+            })
+        })
+    })
+    test('should accept an article_img_url key',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            title:'Post Test',
+            body:'I am implementing a post test',
+            topic:'cats',
+            article_img_url:'https://cdn.pixabay.com/photo/2014/06/03/19/38/road-sign-361514_1280.png'
+        })
+        .expect(200).then(({body})=>{
+            expect(body.article.article_img_url).toBe('https://cdn.pixabay.com/photo/2014/06/03/19/38/road-sign-361514_1280.png')
+        })
+    })
+    test('should return an object with the property of comment count and value null',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            title:'Post Test',
+            body:'I am implementing a post test',
+            topic:'cats',
+        })
+        .expect(200).then(({body})=>{
+            expect(body.article).toHaveProperty('comment_count')
+            expect(body.article.comment_count).toBe(null)
+        })
+    })
+    test('should return an object with a created at property with a value of the current date',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            title:'Post Test',
+            body:'I am implementing a post test',
+            topic:'cats',
+        })
+        .expect(200).then(({body})=>{
+            const {created_at} = body.article
+            const currDate = new Date()
+            expect(new Date(created_at).toString()).toEqual(currDate.toString())
+        })
+    })
+    test('should return an object with votes property value 0',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            title:'Post Test',
+            body:'I am implementing a post test',
+            topic:'cats',
+        })
+        .expect(200).then(({body})=>{
+            const {votes} = body.article
+            expect(votes).toBe(0)
+        })
+    })
+    test('should ignore any additional properties on the body',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            extraKey:'extraValue',
+            author:'rogersop',
+            title:'Post Test',
+            notImportant:100,
+            body:'I am implementing a post test',
+            topic:'cats',
+        })
+        .expect(200).then(({body})=>{
+            expect(body.article).not.toHaveProperty('extraKey')
+            expect(body.article).not.toHaveProperty('notImportant')
+        })
+    })
+    test('should return a 400 bad request if any field of the body is missing',()=>{
+        return request(app)
+        .post('/api/articles')
+        .send({
+            author:'rogersop',
+            body:'I am implementing a post test',
+            topic:'cats',
+        })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        }).then(()=>{
+            return request(app)
+            .post('/api/articles')
+            .send({
+                title:'Post Test',
+                body:'I am implementing a post test',
+                topic:'cats',
+            })
+            .expect(400).then(({body})=>{
+                expect(body.message).toBe('Bad request')
+            })
+        }).then(()=>{
+            return request(app)
+            .post('/api/articles')
+            .send({
+                author:'rogersop',
+                title:'Post Test',
+                topic:'cats',
+            })
+            .expect(400).then(({body})=>{
+                expect(body.message).toBe('Bad request')
+            })
+        }).then(()=>{
+            return request(app)
+            .post('/api/articles')
+            .send({
+                author:'rogersop',
+                title:'Post Test',
+                body:'I am implementing a post test',
+            })
+            .expect(400).then(({body})=>{
+                expect(body.message).toBe('Bad request')
+            })
+        })
+    })
+})

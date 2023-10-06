@@ -84,3 +84,30 @@ exports.updateArticle = (article_id,body) => {
         return result.rows[0]
     })
 }
+
+exports.insertArticle = ({author,title,body,topic,article_img_url = 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700'}) => {
+    return db.query(`
+        INSERT INTO articles
+        (author,title,body,topic,article_img_url)
+        VALUES
+        ($1,$2,$3,$4,$5)
+        RETURNING *;
+    `,[author,title,body,topic,article_img_url]).then((result)=>{
+        const newID = result.rows[0].article_id
+        return db.query(`
+        SELECT *
+        FROM articles
+        LEFT JOIN (SELECT article_id,
+            COUNT(article_id) AS comment_count
+            FROM comments
+            GROUP BY comments.article_id
+        ) AS comment_values 
+        ON comment_values.article_id = articles.article_id
+        WHERE articles.article_id = $1
+        ORDER BY created_at DESC;
+        `,[newID]).then((result)=>{
+            return result.rows[0]
+        })
+        
+    })
+}

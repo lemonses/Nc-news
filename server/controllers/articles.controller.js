@@ -1,4 +1,4 @@
-const {fetchArticle,fetchArticles,fetchComments,updateArticle,insertComment} = require('../models/articles.model.js')
+const {fetchArticle,fetchArticles,fetchComments,updateArticle,insertComment,insertArticle} = require('../models/articles.model.js')
 const {fetchUser} = require('../models/users.models.js')
 const {fetchTopic} = require('../models/topics.model.js')
 
@@ -51,6 +51,14 @@ exports.patchArticle = (req,res,next) => {
     updateArticle(article_id,body).then((article)=>{
         res.status(200).send({article})
     }).catch((err) => {
+        next(err)
+    })
+}
+
+exports.postArticle = (req,res,next) => {
+    insertArticle(req.body).then((article) =>{
+        res.status(200).send({article})
+    }).catch((err)=>{
         next(err)
     })
 }
