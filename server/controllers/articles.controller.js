@@ -13,10 +13,12 @@ exports.getArticle = (req,res,next) => {
 }
 
 exports.getArticles = (req,res,next) => {
-    const {topic,sort_by,order} = req.query
-    Promise.all([fetchArticles(topic,sort_by,order),fetchTopic(topic)])
-    .then(([articles]) => {
-        res.status(200).send({articles})
+    const {topic,sort_by,order,limit,p} = req.query
+    Promise.all([fetchArticles(topic,sort_by,order,limit,p),fetchTopic(topic)])
+    .then(([[total_count,articles]]) => {
+        if(limit || p){
+            res.status(200).send({total_count,articles})
+        }else{res.status(200).send({articles})}
     }).catch((err)=>{
         next(err)
     })

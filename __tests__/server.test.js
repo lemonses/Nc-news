@@ -671,3 +671,85 @@ describe('POST /api/articles',()=>{
         })
     })
 })
+
+describe('GET /api/articles pagination', ()=>{
+    test('should accept a query of limit that will limit the number of results displayed',()=>{
+        return request(app)
+        .get('/api/articles?limit=5')
+        .expect(200).then(({body})=>{
+            expect(body.articles).toHaveLength(5)
+        })
+    })
+    test('should accept a query of p with limit to return a set of articles offset by page number * limit',()=>{
+        return request(app)
+        .get('/api/articles?limit=3&p=2')
+        .expect(200).then(({body})=>{
+            expect(body.articles).toHaveLength(3)
+            expect(body.articles[0].article_id).toBe(16)
+        })
+    })
+    test('if no limit is provided it will default to 10',()=>{
+        return request(app)
+        .get('/api/articles?p=1')
+        .expect(200).then(({body})=>{
+            expect(body.articles).toHaveLength(10)
+        })
+    })
+    test('if the p-1*limit is greater than the number of articles return 404 page not found',()=>{
+        return request(app)
+        .get('/api/articles?limit=99&p=99')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('Page not found')
+        })
+    })
+    test('if limit is greater than the number of articles display all articles',()=>{
+        return request(app)
+        .get('/api/articles?limit=99')
+        .expect(200).then(({body})=>{
+            expect(body.articles).toHaveLength(19)
+        })
+    })
+    test('should return 400 bad request if limit is negative',()=>{
+        return request(app)
+        .get('/api/articles?limit= -3')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if p is negative',()=>{
+        return request(app)
+        .get('/api/articles?p= -3')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if limit is invalid data type',()=>{
+        return request(app)
+        .get('/api/articles?limit=hello')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if p is invalid data type',()=>{
+        return request(app)
+        .get('/api/articles?p=hello')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a property of total_count displaying the total number of articles',()=>{
+        return request(app)
+        .get('/api/articles?limit=3&p=3')
+        .expect(200).then(({body})=>{
+            expect(body).toHaveProperty('total_count')
+            expect(body.total_count).toBe('19')
+        })
+    })
+    test('should return a property of total_count displaying the total number of articles with filters applied',()=>{
+        return request(app)
+        .get('/api/articles?limit=3&p=3&topic=mitch')
+        .expect(200).then(({body})=>{
+            expect(body.total_count).toBe('12')
+        })
+    })
+})

@@ -20,29 +20,46 @@ exports.fetchArticle = (article_id) => {
     })
 }
 
-exports.fetchArticles = (topic = '%',sort_by = 'created_at',order = 'DESC') => {
-        const queryStr = format(`
-        SELECT articles.article_id,
-        articles.author,
-        articles.title,
-        articles.article_id,
-        articles.topic,
-        articles.created_at,
-        articles.votes,
-        articles.article_img_url,
-        comment_values.comment_count
-        FROM articles
-        LEFT JOIN (SELECT article_id,
-        COUNT(article_id) AS comment_count
-        FROM comments
-        GROUP BY comments.article_id)
-        AS comment_values 
-        ON comment_values.article_id = articles.article_id
-        WHERE articles.topic LIKE %L 
-        ORDER BY %s %s;
-    `,topic,sort_by,order)
+exports.fetchArticles = (topic = '%',sort_by = 'created_at',order = 'DESC',limit,p) => {   
+    let stringForFormat = `
+    SELECT articles.article_id,
+    articles.author,
+    articles.title,
+    articles.article_id,
+    articles.topic,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    comment_values.comment_count
+    FROM articles
+    LEFT JOIN (SELECT article_id,
+    COUNT(article_id) AS comment_count
+    FROM comments
+    GROUP BY comments.article_id)
+    AS comment_values 
+    ON comment_values.article_id = articles.article_id
+    WHERE articles.topic LIKE %L 
+    ORDER BY %s %s`
+    let query = [topic,sort_by,order]
+    if(limit || p){
+        if(!limit){
+            limit = '10'
+        }
+        if(!p){
+            p = 1
+        }
+        query.push((p-1) * limit)
+        stringForFormat += ` OFFSET %s ROWS LIMIT %s;`
+        query.push(limit)
+    }
+    const queryStr = format.withArray(stringForFormat,query)
     return db.query(queryStr).then(({rows})=>{
-        return rows
+        if(rows.length === 0 && limit && p){
+            return Promise.reject({status:404,message:'Page not found'})
+        }
+        return Promise.all([db.query(`SELECT COUNT(*) FROM articles WHERE topic LIKE $1;`,[topic]),rows])
+    }).then((result)=>{
+        return [result[0].rows[0].count,result[1]]
     })
 }
 
