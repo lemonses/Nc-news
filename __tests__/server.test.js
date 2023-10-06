@@ -828,3 +828,50 @@ describe('GET /api/articles/:article_id/comments pagination', ()=>{
         })
     })
 })
+
+describe('POST /api/topics',()=>{
+    test('should return 200 status with the posted topic',()=>{
+        return request(app)
+        .post('/api/topics')
+        .send({
+            "slug": "test",
+            "description": "testing"
+        })
+        .expect(200).then(({body})=>{
+            expect(body.topic).toMatchObject({
+                slug:'test',
+                description:'testing'
+            })
+        })
+    })
+    test('should return a 400 Bad request if given a topic slug that is already in use',()=>{
+        return request(app)
+        .post('/api/topics')
+        .send({
+            "slug": "test",
+            "description": "testing"
+        })
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a 400 bad request if no body is provided',()=>{
+        return request(app)
+        .post('/api/topics')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should ignore any additional properties on the body',()=>{
+        return request(app)
+        .post('/api/topics')
+        .send({
+            "slug": "test3",
+            "description": "testing3",
+            "extraKey": "extraValue"
+        })
+        .expect(200).then(({body})=>{
+            expect(body.topic).not.toHaveProperty('extraKey')
+        })
+    })
+})
