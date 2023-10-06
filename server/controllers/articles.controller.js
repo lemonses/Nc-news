@@ -39,9 +39,12 @@ exports.postComment = (req,res,next) => {
 
 exports.getComments = (req,res,next) => {
     const {article_id} = req.params
-    let promises = [fetchComments(article_id),fetchArticle(article_id)]
-    Promise.all(promises).then(([comments]) => {
-        res.status(200).send({comments})
+    const {limit,p} = req.query
+    let promises = [fetchComments(article_id,limit,p),fetchArticle(article_id)]
+    Promise.all(promises).then(([[total_count,comments]]) => {
+        if(limit || p){
+            res.status(200).send({comments,total_count})
+        }else{res.status(200).send({comments})}
     }).catch((err)=>{
         next(err)
     })

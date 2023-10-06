@@ -753,3 +753,78 @@ describe('GET /api/articles pagination', ()=>{
         })
     })
 })
+
+describe('GET /api/articles/:article_id/comments pagination', ()=>{
+    test('should accept a query of limit that will limit the number of results displayed',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=5')
+        .expect(200).then(({body})=>{
+            expect(body.comments).toHaveLength(5)
+        })
+    })
+    test('should accept a query of p with limit to return a set of comments offset by page number * limit',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=3&p=2')
+        .expect(200).then(({body})=>{
+            expect(body.comments).toHaveLength(3)
+            expect(body.comments[0].comment_id).toBe(13)
+        })
+    })
+    test('if no limit is provided it will default to 10',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?p=1')
+        .expect(200).then(({body})=>{
+            expect(body.comments).toHaveLength(10)
+        })
+    })
+    test('if the p-1*limit is greater than the number of comments return 404 page not found',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=99&p=99')
+        .expect(404).then(({body})=>{
+            expect(body.message).toBe('Page not found')
+        })
+    })
+    test('if limit is greater than the number of comments display all comments',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=99')
+        .expect(200).then(({body})=>{
+            expect(body.comments).toHaveLength(10)
+        })
+    })
+    test('should return 400 bad request if limit is negative',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit= -3')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if p is negative',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?p= -3')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if limit is invalid data type',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=hello')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return 400 bad request if p is invalid data type',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?p=hello')
+        .expect(400).then(({body})=>{
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test('should return a property of total_count displaying the total number of comments',()=>{
+        return request(app)
+        .get('/api/articles/1/comments?limit=3&p=3')
+        .expect(200).then(({body})=>{
+            expect(body).toHaveProperty('total_count')
+            expect(body.total_count).toBe('10')
+        })
+    })
+})
