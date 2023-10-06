@@ -1,4 +1,4 @@
-const { db } = require('../connection.js')
+const  db  = require('../../db/connection.js')
 const endpoints = require('../../endpoints.json')
 const format = require('pg-format')
 

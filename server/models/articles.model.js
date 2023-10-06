@@ -1,4 +1,4 @@
-const { db } = require('../connection.js')
+const  db  = require('../../db/connection.js')
 const format = require('pg-format')
 
 exports.fetchArticle = (article_id) => {
