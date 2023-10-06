@@ -27,3 +27,16 @@ exports.fetchTopic = (topic = '%') => {
         return result.rows[0]
     })
 }
+
+exports.updateTopic = (topicToAdd) => {
+    const {slug,description} = topicToAdd
+    return db.query(`
+            INSERT INTO topics
+            (slug,description)
+            VALUES
+            ($1,$2)
+            RETURNING *;
+    `,[slug,description]).then((result)=>{
+        return result.rows[0]
+    })
+}
