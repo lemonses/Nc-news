@@ -1,4 +1,4 @@
-const {db} = require('../connection.js')
+const  db  = require('../../db/connection.js')
 
 exports.fetchUser = (username) => {
     return db.query(`
