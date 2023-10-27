@@ -30,10 +30,10 @@ exports.fetchArticles = (topic = '%',sort_by = 'created_at',order = 'DESC',limit
     articles.created_at,
     articles.votes,
     articles.article_img_url,
-    comment_values.comment_count
+    comment_values.comment_count 
     FROM articles
     LEFT JOIN (SELECT article_id,
-    COUNT(article_id) AS comment_count
+    COALESCE( COUNT(article_id), '0') AS comment_count
     FROM comments
     GROUP BY comments.article_id)
     AS comment_values 
